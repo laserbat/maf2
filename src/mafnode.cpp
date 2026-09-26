@@ -1255,10 +1255,17 @@ Find_Candidate::Find_Candidate(Node_Manager & nm_,
     if (probe_style & 2 && ost > OST_Minimal ||
         upper_overlap_limit >= nm.overlap_filter.forbidden_limit)
       upper_overlap_limit = nm.overlap_filter.forbidden_limit-1;
-    old_lower_overlap_limit = old_lower_overlap_limit = lhs_length + nm.old_overlap_filter.probe_depth;
+    old_lower_overlap_limit = old_upper_overlap_limit = lhs_length + nm.old_overlap_filter.probe_depth;
     if (old_lower_overlap_limit > nm.old_overlap_filter.overlap_limit ||
         probe_style & 2)
       old_lower_overlap_limit = nm.old_overlap_filter.overlap_limit;
+    /* The previous pass searched no further than one short of its
+       forbidden limit (see upper_overlap_limit above), even where its
+       overlap_limit was as long: an overlap it never looked at must not
+       be taken as considered. */
+    if (nm.old_overlap_filter.forbidden_limit &&
+        old_lower_overlap_limit >= nm.old_overlap_filter.forbidden_limit)
+      old_lower_overlap_limit = nm.old_overlap_filter.forbidden_limit-1;
     if (probe_style & 2 ||
         old_upper_overlap_limit >= nm.old_overlap_filter.forbidden_limit)
       old_upper_overlap_limit = nm.old_overlap_filter.forbidden_limit-1;
