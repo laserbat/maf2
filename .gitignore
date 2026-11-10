@@ -1,0 +1,4 @@
+# Build output
+/bin/
+/src/*.o
+/src/*.a
