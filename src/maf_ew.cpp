@@ -445,7 +445,7 @@ bool Equation_Word::reduce(unsigned flags,bool * failed)
   /* What gets recorded is the reductions of this call, which the caller
      passes on to the equation's derivation if it keeps the result. Anything
      left from an earlier call was a trial reduction of words since replaced */
-  if (nm.maf.options.log_flags & LOG_DERIVATIONS)
+  if (nm.maf.options.log_flags & LOG_RECORD)
     reductions.empty();
 
   if (nm.maf.reduction_available())
@@ -501,7 +501,7 @@ bool Equation_Word::reduce(unsigned flags,bool * failed)
         break;
       }
       valid_length -= lhs_length;
-      if (nm.maf.options.log_flags & LOG_DERIVATIONS)
+      if (nm.maf.options.log_flags & LOG_RECORD)
         reductions.add_state(s,valid_length);
       if (valid_length || rhs->is_final())
         rhs->read_values(values+valid_length,nm,rhs_length);
@@ -578,7 +578,7 @@ bool Equation_Word::hard_reduce(unsigned flags,bool * failed)
       !rhs->is_final())
   {
     /* In this case we can do an immediate reduction and return */
-    if (nm.maf.options.log_flags & LOG_DERIVATIONS)
+    if (nm.maf.options.log_flags & LOG_RECORD)
       reductions.add_state(s,0);
     allocate(rhs->length(nm));
     rhs->read_states_and_values(values,state+1,nm,rhs,word_length);
@@ -623,7 +623,7 @@ bool Equation_Word::hard_reduce(unsigned flags,bool * failed)
       if (lhs_length==valid_length && !rhs->is_final())
       {
         /* In this case we can do an immediate reduction */
-        if (nm.maf.options.log_flags & LOG_DERIVATIONS)
+        if (nm.maf.options.log_flags & LOG_RECORD)
           reductions.add_state(s,0);
         allocate(rhs_length);
         rhs->read_states_and_values(values,state+1,nm,rhs,rhs_length);
@@ -632,7 +632,7 @@ bool Equation_Word::hard_reduce(unsigned flags,bool * failed)
       else
       {
         valid_length -= lhs_length;
-        if (nm.maf.options.log_flags & LOG_DERIVATIONS)
+        if (nm.maf.options.log_flags & LOG_RECORD)
           reductions.add_state(s,valid_length);
         word_length = valid_length;
         if (stack_top + rhs_length > MAX_WORD)

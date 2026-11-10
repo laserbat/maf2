@@ -259,9 +259,13 @@ class Derivation
       ID pool_id;
     } data;
   public:
+    /* Proof tracing only: the trace ids of equations a derivation cites,
+       where they have to be captured when the derivation is created */
+    int tpid[2];
     Derivation(Basic_Derivation_Type type_) :
       type(type_)
     {
+      tpid[0] = tpid[1] = 0;
       data.overlap.e1 = 0;
       data.overlap.e2 = 0;
       data.overlap.offset = 0;
@@ -269,6 +273,7 @@ class Derivation
     Derivation(Basic_Derivation_Type type_,Node_Handle e1) :
       type(type_)
     {
+      tpid[0] = tpid[1] = 0;
       data.overlap.e1 = e1;
       data.overlap.e2 = 0;
       data.overlap.offset = 0;
@@ -277,6 +282,7 @@ class Derivation
                Node_Handle e2,Word_Length offset = 0) :
       type(type_)
     {
+      tpid[0] = tpid[1] = 0;
       data.overlap.e1 = e1;
       data.overlap.e2 = e2;
       data.overlap.offset = offset;
@@ -284,12 +290,14 @@ class Derivation
     Derivation(Basic_Derivation_Type type_,Node_Handle e1,Ordinal g) :
       type(type_)
     {
+      tpid[0] = tpid[1] = 0;
       data.conjugate.e1 = e1;
       data.conjugate.g = g;
     }
     Derivation(ID pool_id,Basic_Derivation_Type type_ = BDT_Pool) :
       type(type_)
     {
+      tpid[0] = tpid[1] = 0;
       data.pool_id = pool_id;
     }
     Derivation(Basic_Derivation_Type type_,Node_Handle state,
@@ -297,6 +305,7 @@ class Derivation
                Node_ID old_state = 0):
       type(type_)
     {
+      tpid[0] = tpid[1] = 0;
       data.computation.state = state;
       data.computation.ti = ti;
       data.computation.old_state = old_state;
@@ -304,6 +313,11 @@ class Derivation
     Node_ID right_conjugate() const
     {
       return type == BDT_Right_Conjugate ? data.conjugate.e1 : 0;
+    }
+    void set_trace(int pid1,int pid2)
+    {
+      tpid[0] = pid1;
+      tpid[1] = pid2;
     }
     Basic_Derivation_Type get_type() const
     {

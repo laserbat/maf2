@@ -46,6 +46,9 @@ Revision 1.6  2007/11/15 22:58:12Z  Alun
 #ifndef EQUATION_INCLUDED
 #include "equation.h"
 #endif
+#ifndef MAF_TRACE_INCLUDED
+#include "maf_trace.h"
+#endif
 
 
 const unsigned PD_CHECK = 1;
@@ -79,9 +82,23 @@ enum Derivation_Step_Type
 
 class Working_Equation; // Forward declaration required by some compilers
 
+/* What a proof trace needs to know about one operation on an equation.
+   pid and pos describe a rewrite, g a balancing generator, leading and
+   trailing a cancellation */
+struct Trace_Op
+{
+  unsigned short type; // a Derivation_Step_Type
+  int pid;
+  int pos;
+  Ordinal g;
+  Word_Length leading;
+  Word_Length trailing;
+};
+
 class Full_Derivation : public Derivation
 {
   friend class Working_Equation;
+  friend class Proof_Trace;
   private:
     struct Derivation_Step
     {
@@ -109,6 +126,13 @@ class Full_Derivation : public Derivation
     Derivation_Step * tail;
     bool logged;
     bool started;
+    /* Proof tracing: when traced is set every operation is also recorded
+       in trace_ops, and trace_base is the derivation of original_rhs from
+       original_lhs; see maf_trace.cpp */
+    bool traced;
+    std::vector<Trace_Op> trace_ops;
+    Trace_Chain trace_base;
+    std::string trace_origin;
   public:
     Full_Derivation(const Derivation & derivation,const Alphabet & alphabet) :
       Derivation(derivation),
@@ -116,6 +140,7 @@ class Full_Derivation : public Derivation
       tail(0),
       logged(false),
       started(false),
+      traced(false),
       original_lhs(alphabet),
       original_rhs(alphabet)
     {}
@@ -127,6 +152,8 @@ class Full_Derivation : public Derivation
     {
       clean();
       started = false;
+      traced = false;
+      trace_ops.clear();
       * (Derivation *) this = derivation;
     }
 
@@ -139,6 +166,8 @@ class Full_Derivation : public Derivation
         step->data.cancellation.trailing = trailing;
         add(step);
       }
+      if (traced)
+        trace(DST_Cancellation,0,0,0,leading,trailing);
     }
     void add_left_balance(Ordinal g)
     {
@@ -148,11 +177,15 @@ class Full_Derivation : public Derivation
         step->data.g = g;
         add(step);
       }
+      if (traced)
+        trace(DST_Left_Balance,0,0,g);
     }
     void add_left_free_reduction(Word_Length offset,Ordinal g)
     {
       if (logged)
         add_free_reduction(DST_Left_Free_Reduction,offset,g);
+      if (traced)
+        trace(DST_Left_Free_Reduction,0,offset,g);
     }
     void add_left_reduction(Node_List & nl,const Node_Manager &nm)
     {
@@ -167,11 +200,15 @@ class Full_Derivation : public Derivation
         step->data.g = g;
         add(step);
       }
+      if (traced)
+        trace(DST_Right_Balance,0,0,g);
     }
     void add_right_free_reduction(Word_Length offset,Ordinal g)
     {
       if (logged)
         add_free_reduction(DST_Right_Free_Reduction,offset,g);
+      if (traced)
+        trace(DST_Right_Free_Reduction,0,offset,g);
     }
     void add_right_reduction(Node_List & nl,const Node_Manager &nm)
     {
@@ -185,6 +222,8 @@ class Full_Derivation : public Derivation
         Derivation_Step * step = new Derivation_Step(DST_Swap);
         add(step);
       }
+      if (traced)
+        trace(DST_Swap);
     }
     void add_transfer(Word_Length l)
     {
@@ -194,6 +233,8 @@ class Full_Derivation : public Derivation
         step->offset = l;
         add(step);
       }
+      if (traced)
+        trace(DST_Transfer,0,l);
     }
     void add_unbalance(Ordinal g)
     {
@@ -203,6 +244,8 @@ class Full_Derivation : public Derivation
         step->data.g = g;
         add(step);
       }
+      if (traced)
+        trace(DST_Unbalance,0,0,g);
     }
     void log()
     {
@@ -211,6 +254,18 @@ class Full_Derivation : public Derivation
     void print(Container & container,Output_Stream * stream,Rewriter_Machine &rm);
     void set_original(const Working_Equation &we);
   private:
+    void trace(Derivation_Step_Type type,int pid = 0,int pos = 0,
+               Ordinal g = 0,Word_Length leading = 0,Word_Length trailing = 0)
+    {
+      Trace_Op op;
+      op.type = (unsigned short) type;
+      op.pid = pid;
+      op.pos = pos;
+      op.g = g;
+      op.leading = leading;
+      op.trailing = trailing;
+      trace_ops.push_back(op);
+    }
     void add(Derivation_Step * step)
     {
       if (tail)
@@ -248,6 +303,7 @@ struct Equation_Properties
 class Working_Equation : public Equation
 {
   friend class Rewriter_Machine;
+  friend class Proof_Trace;
   BLOCKED(Working_Equation)
   private:
     Node_Manager & nm;

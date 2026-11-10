@@ -59,6 +59,7 @@ stream.o : \
   awcrt.h
 
 maf.o : \
+  maf_trace.h \
   mafauto.h \
   mafword.h \
   container.h \
@@ -84,6 +85,7 @@ maf.o : \
   nodebase.h
 
 present.o : \
+  maf_trace.h \
   maf.h \
   mafword.h \
   equation.h \
@@ -180,6 +182,7 @@ maf_dr.o : \
   maf_ssi.h
 
 maf_dt.o : \
+  maf_trace.h \
   container.h \
   maf_dt.h \
   maf_nm.h \
@@ -212,6 +215,7 @@ maf_el.o : \
   mafbase.h
 
 maf_em.o : \
+  maf_trace.h \
   awcc.h \
   maf_rm.h \
   maf_em.h \
@@ -253,6 +257,7 @@ maf_ew.o : \
   arraybox.h
 
 maf_jm.o : \
+  maf_trace.h \
   maf_jm.h \
   mafnode.h \
   maf_wdb.h \
@@ -300,6 +305,7 @@ maf_mult.o : \
   arraybox.h
 
 maf_nm.o : \
+  maf_trace.h \
   mafnode.h \
   maf_nm.h \
   maf_rm.h \
@@ -325,6 +331,7 @@ maf_nm.o : \
   maf_avl.h
 
 maf_rm.o : \
+  maf_trace.h \
   fsa.h \
   maf_rm.h \
   maf_nm.h \
@@ -361,6 +368,7 @@ maf_rm.o : \
   alphabet.h
 
 maf_rws.o : \
+  maf_trace.h \
   maf.h \
   mafword.h \
   keyedfsa.h \
@@ -445,6 +453,7 @@ maf_subwa.o : \
   arraybox.h
 
 maf_we.o : \
+  maf_trace.h \
   maf_rm.h \
   mafnode.h \
   maf_nm.h \
@@ -549,6 +558,7 @@ fsa.o : \
   arraybox.h
 
 mafauto.o : \
+  maf_trace.h \
   awdefs.h \
   fsa.h \
   maf_rm.h \
@@ -617,6 +627,7 @@ mafcoset.o : \
   arraybox.h
 
 mafgeowa.o : \
+  maf_trace.h \
   container.h \
   mafword.h \
   keyedfsa.h \
@@ -790,6 +801,7 @@ x_to_str.o : \
   x_to_str.h
 
 automata.o : \
+  maf_trace.h \
   maf.h \
   fsa.h \
   container.h \
@@ -804,6 +816,7 @@ automata.o : \
   alphabet.h
 
 autcos.o : \
+  maf_trace.h \
   automata.cpp \
   maf.h \
   fsa.h \
@@ -819,6 +832,7 @@ autcos.o : \
   alphabet.h
 
 autgroup.o : \
+  maf_trace.h \
   automata.cpp \
   maf.h \
   fsa.h \
@@ -834,6 +848,7 @@ autgroup.o : \
   alphabet.h
 
 kbprog.o : \
+  maf_trace.h \
   automata.cpp \
   maf.h \
   fsa.h \
@@ -849,6 +864,7 @@ kbprog.o : \
   alphabet.h
 
 kbprogcos.o : \
+  maf_trace.h \
   automata.cpp \
   maf.h \
   fsa.h \
@@ -1206,6 +1222,7 @@ gpgeowa.o : \
   awdefs.h
 
 gpmakefsa.o : \
+  maf_trace.h \
   automata.cpp \
   maf.h \
   fsa.h \
@@ -1557,3 +1574,27 @@ simplify.o : \
   maf_ssi.h \
   nodebase.h
 
+maf_trace.o : \
+  awcc.h \
+  maf.h \
+  mafbase.h \
+  maf_rm.h \
+  maf_ew.h \
+  mafword.h \
+  awdefs.h \
+  alphabet.h \
+  certificate.h \
+  nodelist.h \
+  nodebase.h \
+  equation.h \
+  node_status.h \
+  mafnode.h \
+  maf_nm.h \
+  maf_we.h \
+  maf_trace.h \
+  hash.h \
+  arraybox.h \
+  maf_rws.h \
+  fsa.h \
+  maf_ssi.h \
+  container.h

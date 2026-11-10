@@ -141,6 +141,7 @@
 #include "keyedfsa.h"
 #include "container.h"
 #include "variadic.h"
+#include "maf_trace.h"
 #include "maf_dt.h"
 #include "maf_dr.h"
 #include "maf_ont.h"
@@ -2202,6 +2203,9 @@ void Rewriter_Machine::add_to_tree(Working_Equation * we,unsigned flags,
      into removed nodes, except possibly for the RHS of some equations.
   */
 
+  /* The trace has to have the equation before the tree changes, since
+     what it cites is resolved against the tree */
+  int pid = proof_trace ? proof_trace->emit_equation(*we) : 0;
   Equation_Word & lhs = we->lhs_word();
   Equation_Word & rhs = we->rhs_word();
   Word_Length l = lhs.word_length;
@@ -2337,8 +2341,10 @@ void Rewriter_Machine::add_to_tree(Working_Equation * we,unsigned flags,
           if (rhs_last == other->last_letter())
           {
             /* from ax=by and cy=ax deduce c=b */
-            jm.equate_nodes(other->parent(nm),rhs_node->parent(nm),
-                            Derivation(BDT_Equal_RHS,other,e));
+            Derivation d(BDT_Equal_RHS,other,e);
+            if (proof_trace)
+              d.set_trace(proof_trace->node_equation(nm,other),pid);
+            jm.equate_nodes(other->parent(nm),rhs_node->parent(nm),d);
             break;
           }
       }
@@ -2349,13 +2355,18 @@ void Rewriter_Machine::add_to_tree(Working_Equation * we,unsigned flags,
         remove_differences(e);
       if (flags & AE_STRONG_INSERT)
       {
-        jm.equate_nodes(e->fast_reduced_node(nm),rhs_node,Derivation(BDT_Equal_RHS,e,e));
+        Derivation d(BDT_Equal_RHS,e,e);
+        if (proof_trace)
+          d.set_trace(proof_trace->node_equation(nm,e),pid);
+        jm.equate_nodes(e->fast_reduced_node(nm),rhs_node,d);
         flags &= ~AE_STRONG_INSERT;
       }
     }
   }
   e = nm.construct_equation(prefix,rvalue,we->eq_flags,rhs_node,trailing_subword);
   lhs.state[l] = e;
+  if (proof_trace)
+    proof_trace->set_node(e,pid);
 
   /* Having constructed ax=b we now think about bX=a, which should
      be an equation as well.*/
@@ -2373,7 +2384,10 @@ void Rewriter_Machine::add_to_tree(Working_Equation * we,unsigned flags,
         urgent = balanced = rhs.compare(Subword(lhs,0,l-1)) > 0;
         rhs.set_length(r);
       }
-      jm.equate_nodes(rhs_node,prefix,Derivation(BDT_Right_Conjugate,e),
+      Derivation d(BDT_Right_Conjugate,e);
+      if (proof_trace)
+        d.set_trace(pid,0);
+      jm.equate_nodes(rhs_node,prefix,d,
                       ivalue,urgent && !(flags & AE_WANT_WEAK_INSERT));
     }
   }
@@ -2424,8 +2438,10 @@ void Rewriter_Machine::add_to_tree(Working_Equation * we,unsigned flags,
         if (other->last_letter() == rvalue)
         {
           /* from ax=b and cx=b deduce a=c */
-          jm.equate_nodes(other->parent(nm),prefix,
-                          Derivation(BDT_Equal_RHS,other,e));
+          Derivation d(BDT_Equal_RHS,other,e);
+          if (proof_trace)
+            d.set_trace(proof_trace->node_equation(nm,other),pid);
+          jm.equate_nodes(other->parent(nm),prefix,d);
           break;
         }
     }
@@ -2435,7 +2451,10 @@ void Rewriter_Machine::add_to_tree(Working_Equation * we,unsigned flags,
         if (lvalue == other->first_letter(nm) && other->fast_is_primary())
         {
           /* from ax=b a==gu and gv=b deduce ux=v */
-          jm.equate_nodes(other,e,Derivation(BDT_Equal_RHS,other,e));
+          Derivation d(BDT_Equal_RHS,other,e);
+          if (proof_trace)
+            d.set_trace(proof_trace->node_equation(nm,other),pid);
+          jm.equate_nodes(other,e,d);
           break;
         }
     }
@@ -2523,6 +2542,8 @@ bool Rewriter_Machine::add_to_pool(Element_ID * id,Working_Equation *we,unsigned
   if (dt && !stats.favour_differences && !stats.hidden_differences)
     stats.hidden_differences = dt->is_interesting_equation(*we,AE_IGNORE_PRIMARY);
 
+  /* Pool equations are found again by their words, see maf_trace.cpp */
+  int pid = proof_trace ? proof_trace->emit_equation(*we) : 0;
   Element_ID key;
   if (!pool->insert(lhs,&key))
   {
@@ -2531,7 +2552,10 @@ bool Rewriter_Machine::add_to_pool(Element_ID * id,Working_Equation *we,unsigned
     pool->get_rhs(&old_rhs_word,key);
     if (words_differ(rhs,old_rhs_word,r+1))
     {
-      em.queue(old_rhs_word,rhs,Derivation(key,BDT_Equal_LHS),AE_PRE_CANCEL);
+      Derivation d(key,BDT_Equal_LHS);
+      if (proof_trace)
+        d.set_trace(proof_trace->equation(lhs,old_rhs_word),pid);
+      em.queue(old_rhs_word,rhs,d,AE_PRE_CANCEL);
       if (old_rhs_word.compare(rhs) > 0)
       {
         if (good && !stats.want_differences)
@@ -3366,8 +3390,12 @@ void Rewriter_Machine::schedule_right_conjugation(Equation_Handle e)
       Node_Reference conjugate = rhs_node->transition(nm,ig);
       if (conjugate->reduced_node(nm,conjugate) != prefix &&
           rhs_node->length(nm) < MAX_WORD)
-        jm.equate_nodes(rhs_node,prefix,Derivation(BDT_Right_Conjugate,e),ig,
-                        true);
+      {
+        Derivation d(BDT_Right_Conjugate,e);
+        if (proof_trace)
+          d.set_trace(proof_trace->node_equation(nm,e),0);
+        jm.equate_nodes(rhs_node,prefix,d,ig,true);
+      }
     }
   }
 }

@@ -97,6 +97,10 @@ class Rewriting_System : public Delegated_FSA
     Array_Of_Data packed_rhses;
     bool confluent;
     Ordinal *inverses;
+    /* the machine a minimal system (what goes in the .kbprog file) was
+       built from, or 0: a proof trace needs it to resolve the equations
+       print() writes out */
+    Rewriter_Machine * source;
   public:
     // if the taker parameter is non-zero, which only makes sense when
     // the RWSC_NEED_FSA flag is set, the FSA created by the constructor

@@ -236,6 +236,7 @@
 #include "maf_we.h"
 #include "rubik.h"
 #include "mafcoset.h"
+#include "maf_trace.h"
 
 bool Word_Reducer::reducible(const Word & word,Word_Length length)
 {
@@ -440,6 +441,12 @@ void MAF::realise_rm()
   {
     if (!flags_set)
       set_flags();
+    if (proof_trace && !proof_trace->started())
+    {
+      /* The header has to come before the first axiom */
+      if (!proof_trace->start((MAF &) *this))
+        exit(1);
+    }
     rm = new Rewriter_Machine((MAF &)*this);
     /* In this case any axioms added so far have been stored in the
        presentation */

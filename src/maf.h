@@ -378,6 +378,10 @@ class Presentation : protected Presentation_Data
     APIMETHOD bool add_axiom(const Word &lhs,const Word &rhs,unsigned flags = AA_DEFAULT);
     APIMETHOD void add_permutation(String str);
     void delete_permutations();
+    bool has_permutations() const
+    {
+      return permutation != 0;
+    }
     APIMETHOD void set_generators(String gens);
     APIMETHOD void set_inverse(Ordinal g,Ordinal ig,unsigned flags = 0);
     APIMETHOD void set_inverses(String inverse);
@@ -521,6 +525,11 @@ class Word_Reducer
 const unsigned LOG_WORD_DIFFERENCES = 1;
 const unsigned LOG_EQUATIONS = 2;
 const unsigned LOG_DERIVATIONS = 4;
+/* LOG_TRACE is set while a proof trace is being written (the -trace
+   option). Like LOG_DERIVATIONS it makes MAF record how each equation is
+   derived, but nothing is printed */
+const unsigned LOG_TRACE = 8;
+const unsigned LOG_RECORD = LOG_DERIVATIONS|LOG_TRACE;
 
 /* flags for create_from_input(),create_rws() etc. */
 const unsigned CFI_NAMED_H_GENERATORS = 1;

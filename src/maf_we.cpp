@@ -66,12 +66,22 @@ void Full_Derivation::add_reduction(Derivation_Step_Type type,Node_List & nl,
 
   Node_Reference e;
   int offset;
+  Trace_Chain chain;
   while (nl.use(&e,nm,&offset))
   {
     Derivation_Step * step = new Derivation_Step(type);
     step->offset = Word_Length(offset);
     step->data.e = e;
     add(step);
+    if (traced)
+    {
+      /* Resolve the equation now: the node may hold a different one by
+         the time the equation is written to the trace */
+      chain.clear();
+      proof_trace->node_chain(nm,e,offset,&chain);
+      for (size_t i = 0; i < chain.size();i++)
+        trace(type,chain[i].pid,chain[i].pos);
+    }
   }
 }
 
@@ -488,7 +498,10 @@ Working_Equation::Working_Equation(Node_Manager & nm_,
   balanced(0),
   eq_flags(0)
 {
-  if (nm.maf.options.log_flags & LOG_DERIVATIONS)
+  if (nm.maf.options.log_flags & LOG_TRACE)
+    log(); /* so that a trace sees the free reductions made before
+              normalise() is called */
+  else if (nm.maf.options.log_flags & LOG_DERIVATIONS)
     derivation.log();
 }
 
@@ -623,10 +636,12 @@ static Total_Length cancellable_length(const Rewriter_Machine & rm,const Word & 
 
 void Working_Equation::log()
 {
-  if (nm.maf.options.log_flags & LOG_DERIVATIONS)
+  if (nm.maf.options.log_flags & LOG_RECORD)
   {
     derivation.log();
     derivation.set_original(*this);
+    if (proof_trace && !derivation.traced)
+      proof_trace->begin(*this);
   }
 }
 

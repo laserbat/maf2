@@ -57,6 +57,7 @@
 #include "maf_sub.h"
 #include "maf_so.h"
 #include "mafctype.h"
+#include "maf_trace.h"
 
 #ifndef PROGRAM_NAME
 #define PROGRAM_NAME "automata"
@@ -515,6 +516,14 @@ int main(int argc,char ** argv)
         so.parse_natural(&options.timeout,argv[i+1],0,arg);
         i += 2;
       }
+      else if (arg.is_equal("-trace"))
+      {
+        if (i+1 >= argc)
+          bad_usage = true;
+        else
+          Proof_Trace::set_filename(argv[i+1]);
+        i += 2;
+      }
       else if (arg.is_equal("-validate"))
       {
         options.validate = true;
@@ -590,6 +599,18 @@ int main(int argc,char ** argv)
   }
   if (options.log_flags & LOG_EQUATIONS && so.verbose)
     options.log_flags |= LOG_DERIVATIONS;
+  if (Proof_Trace::wanted() && !bad_usage)
+  {
+    if (cosets)
+    {
+      cprintf("Proof tracing is not supported for coset systems.\n");
+      return 1;
+    }
+    proof_trace = new Proof_Trace(Proof_Trace::wanted());
+    if (flags & CFI_RESUME)
+      proof_trace->set_resumed();
+    options.log_flags |= LOG_TRACE;
+  }
   container.set_log_level(so.log_level);
   if (group_filename && !bad_usage)
   {
@@ -628,6 +649,11 @@ int main(int argc,char ** argv)
 #endif
     if (maf->aborting)
       exit_code = 2;
+    if (proof_trace)
+    {
+      delete proof_trace; // writes the list of final equations
+      proof_trace = 0;
+    }
     container.progress(1,"Elapsed time %ld\n",long(time(0) - now));
     global_maf = 0;
     delete maf;
@@ -655,6 +681,9 @@ int main(int argc,char ** argv)
 "                     automatic structure.\n"
 #endif
 
+"-trace file          Write a proof trace to file: each equation found, with the\n"
+"                     rewriting steps that derive it, in the format of KBMAG's\n"
+"                     kbprog -trace. Not for coset systems.\n"
 #if !defined(EMULATE)
 "-validate            Enable or disable axiom-checking for automatic structures.\n"
 "-no_validate         The default behaviour is to check axioms only for coset\n"

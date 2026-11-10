@@ -128,6 +128,7 @@ MAFLIB = \
   maf_sub.$O \
   maf_subwa.$O \
   maf_we.$O \
+  maf_trace.$O \
   mafqueue.$O \
   mafctype.$O \
   mafword.$O \

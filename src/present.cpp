@@ -48,6 +48,7 @@
 #include "mafword.h"
 #include "equation.h"
 #include "container.h"
+#include "maf_trace.h"
 
 Presentation_Data::Presentation_Data(Presentation_Type presentation_type_) :
   nr_generators(0),
@@ -465,6 +466,8 @@ bool Presentation::add_axiom(const Word &lhs_word,const Word &rhs_word,unsigned 
     }
   }
 
+  if (proof_trace)
+    proof_trace->given_axiom(lhs_word,rhs_word);
   if (flags & AA_ADD_TO_RM)
     retcode = insert_axiom(lhs_word,rhs_word,flags);
   else
