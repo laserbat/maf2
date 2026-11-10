@@ -148,6 +148,9 @@ actually build an automatic structure because the size of the trial word-accepto
 <kbd><a name="vwd"></a>-vwd</kbd><br>
 <p>The verbose word-differences option. In addition to MAF's normal output, each new word-difference found is printed to <tt>stdout</tt>, together with the equation from which it was computed.
 </p>
+<kbd><a name="trace"></a>-trace <i>tracefile</i></kbd><br>
+<p>Write a proof trace to <i>tracefile</i>. Every equation MAF stores, in its tree or in its pool, is written to the trace together with the rewriting steps that derive it from equations written earlier, and the trace ends with the list of the rules in the <tt>.kbprog</tt> file. Following the citations back from those rules leads to the axioms, so the trace contains a proof that each rule of the rewriting system follows from the presentation (though not that the system is confluent). The format is the one used by the <kbd>-trace</kbd> option of the KBMAG fork at <a href="https://github.com/laserbat/kbmag">github.com/laserbat/kbmag</a> (branch <tt>proof-trace</tt>), whose <tt>tools/extract_proof.py</tt> turns a trace into a self-contained proof and <tt>tools/check_proof.py</tt> checks it; <tt>src/maf_trace.h</tt> describes the format.</p>
+<p>Every derivation is replayed as it is written, and one that MAF did not record in a form that can be turned into rewriting steps, such as an equation proved from word-differences, is written with a step citing equation 0 instead. If any such holes are written a warning gives their number when <tt>automata</tt> finishes. Cancellations and balancing in groups and cancellative monoids are expressed through equations of the form <i>g*w</i>=1. The axioms are recorded as MAF read them, so their two sides may be swapped compared with the input file. Tracing is not supported for coset systems, nor when generator permutations are given, and the trace of a resumed run takes the equations read back in as axioms. Traces are large, since they hold every equation the run passed through.</p>
 
 <h3>The <a name="strategy"></a><kbd>-strategy <i>string</i></kbd> option</h3>
 <p>The <kbd>-strategy <i>string</i></kbd> option allows the user to select one of a range of predefined strategies. If it is not used then MAF will pick a strategy based on the properties of the input file and any goal setting options that have been specified (and perhaps some other command line options also). Most predefined strategies have been found to work well with a number of input files, but some are only provided for comparison purposes. The string consists of two parts: first comes a strategy name (which may be blank). This may optionally be followed by a / and a number of single letter options which modify some part of the strategy. The modifiers must be used with caution, because it is possible to create strategies that will cause MAF to create an endless stream of ever longer equations, when other strategies would succeed. Setting a non-empty strategy name is also usually equivalent to setting a number of the other options discussed in later sections. For this reason the <kbd>-strategy</kbd> option should usually come early on the command line. It is perfectly legitimate to specify specific new values for options that have already been set by the particular strategy.</p>
@@ -717,6 +720,11 @@ The table below lists all the options that may affect processing significantly. 
 
 <tr>
 <td><a href="#ve"><kbd>-ve</kbd></a></td>
+<td>N/A</td>
+</tr>
+
+<tr>
+<td><a href="#trace"><kbd>-trace <i>tracefile</i></kbd></a></td>
 <td>N/A</td>
 </tr>
 
