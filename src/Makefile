@@ -29,7 +29,7 @@ LINK_EXTRA =
 
 all: \
   $(BIN)/example \
-  $(BIN)/libmaf.dylib \
+  $(LIBS) \
   $(BIN)/automata \
   $(BIN)/autcos \
   $(BIN)/autgroup \
@@ -159,7 +159,20 @@ MAFLIB = \
 LIBS = $(BIN)/libmaf.dylib
 
 maf.a : $(MAFLIB)
-	libtool -static -o $@ $(MAFLIB)
+	rm -f $@
+	ar rcs $@ $(MAFLIB)
+
+#"make static" builds every program as a standalone executable in
+#$(STATIC_BIN): linked statically against maf.a and the C and C++ runtime
+#libraries, so that it needs neither libmaf.dylib nor anything else at run
+#time and can be copied anywhere.
+STATIC_BIN = ./../bin/static
+
+static :
+	-mkdir -p $(STATIC_BIN)
+	$(MAKE) BIN=$(STATIC_BIN) LIBS=maf.a LINK_EXTRA=-static all
+
+.PHONY : all static
 
 $(BIN)/libmaf.dylib : $(MAFLIB)
 	-mkdir $(BIN)
