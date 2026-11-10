@@ -827,6 +827,8 @@ bool Working_Equation::geodesic_balance(unsigned flags)
       derivation.add_right_reduction(rhs->reductions,nm);
       return true;
     }
+    /* record the reduction now, before the cancellations it may allow */
+    derivation.add_right_reduction(rhs->reductions,nm);
     changed = true;
   }
 }
@@ -994,7 +996,10 @@ bool Working_Equation::balance(unsigned flags)
       if (rhs->language != language_L0)
       {
         if (rhs->reduce(0,no_fail))
+        {
+          derivation.add_right_reduction(rhs->reductions,nm);
           continue;
+        }
         if (failed)
           return true;
       }
@@ -1170,6 +1175,8 @@ bool Working_Equation::balance(unsigned flags)
       derivation.add_right_reduction(rhs->reductions,nm);
       return true;
     }
+    /* record the reduction now, before the cancellations it may allow */
+    derivation.add_right_reduction(rhs->reductions,nm);
     changed = true;
   }
 }
@@ -1325,7 +1332,9 @@ bool Working_Equation::prepare_for_insert(unsigned ae_flags)
     /* normalise may return equation with words without state, for
        example if it performed cancellations after reduction */
     lhs->reduce(AE_KEEP_LHS);
+    derivation.add_left_reduction(lhs->reductions,nm);
     rhs->reduce(0);
+    derivation.add_right_reduction(rhs->reductions,nm);
   }
   return true;
 }

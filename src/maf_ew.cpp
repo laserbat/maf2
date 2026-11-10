@@ -442,6 +442,12 @@ bool Equation_Word::reduce(unsigned flags,bool * failed)
   Node_Reference s;
   Ordinal rvalue = PADDING_SYMBOL;
 
+  /* What gets recorded is the reductions of this call, which the caller
+     passes on to the equation's derivation if it keeps the result. Anything
+     left from an earlier call was a trial reduction of words since replaced */
+  if (nm.maf.options.log_flags & LOG_DERIVATIONS)
+    reductions.empty();
+
   if (nm.maf.reduction_available())
   {
     /* Most reduction in the automata growing parts of maf eventually gets to
