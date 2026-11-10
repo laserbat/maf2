@@ -21,7 +21,7 @@
 #If any of the compilation flags cause trouble, then you can probably remove them
 #If you are not using GCC compilers then make sure you enable whatever flag
 #ensures char is unsigned by default.
-CPPFLAGS = -fPIC -m64 -Os -Wall -Wextra -Wno-switch -Wno-reorder -Wno-char-subscripts  -funsigned-char -fpermissive -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden -fno-exceptions 
+CPPFLAGS = -fPIC -m64 -Os -Wall -Wextra -Wno-switch -Wno-reorder -Wno-char-subscripts  -funsigned-char -fpermissive -fno-rtti -fno-threadsafe-statics -fno-exceptions 
 LINKER = g++ -m64 
 BIN = ./../bin
 O=o
